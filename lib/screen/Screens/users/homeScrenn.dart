@@ -257,7 +257,7 @@ appBar: AppBar(
             "الرصيد: $balance",
             style: TextStyle(fontSize: 15.sp, color: Colors.white),
             textAlign: TextAlign.end, // لمحاذاة النص إلى اليمين
-            overflow: TextOverflow.ellipsis, // ضمان النص لا يسبب مشاكل
+            overflow: TextOverflow.ellipsis, //  .ضمان النص لا يسبب مشاكل
           ),
         ),
       ),
