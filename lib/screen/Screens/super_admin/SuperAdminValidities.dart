@@ -30,7 +30,6 @@ class _ValiditiesState extends State<Validities> {
       return firestore.collection('users')
           .where('name', isGreaterThanOrEqualTo: searchQuery)
           .where('name', isLessThanOrEqualTo: searchQuery + '\uf8ff')
-          // .orderBy('createdAt', descending: true)  // ترتيب تنازلي حسب createdAt
           .snapshots();
     }
   }
@@ -138,12 +137,15 @@ class _ValiditiesState extends State<Validities> {
                                       size: 24.sp,
                                     ),
                                      SizedBox(width: 8.h),
-                                    Text(
-                                      "الاسم: ${userData['name'] ?? 'غير متوفر'}",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18.sp,
-                                        color: isAdmin ? Colors.teal : Colors.black,
+                                    Expanded( // اجعل الاسم قابلاً للتكبير ولكن داخل الحدود
+                                      child: Text(
+                                        "الاسم: ${userData['name'] ?? 'غير متوفر'}",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18.sp,
+                                          color: isAdmin ? Colors.teal : Colors.black,
+                                        ),
+                                        overflow: TextOverflow.ellipsis, // اختصار النص إذا تجاوز الحدود
                                       ),
                                     ),
                                   ],
@@ -157,7 +159,13 @@ class _ValiditiesState extends State<Validities> {
                                       size: 20.sp,
                                     ),
                                     const SizedBox(width: 8),
-                                    Text("البريد الإلكتروني: ${userData['email'] ?? 'غير متوفر'}", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                                    Expanded( // اجعل البريد الإلكتروني قابل للتكبير
+                                      child: Text(
+                                        "البريد الإلكتروني: ${userData['email'] ?? 'غير متوفر'}",
+                                        style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
+                                        overflow: TextOverflow.ellipsis, // اختصار النص
+                                      ),
+                                    ),
                                   ],
                                 ),
                                  SizedBox(height: 8.h),
@@ -169,7 +177,13 @@ class _ValiditiesState extends State<Validities> {
                                       size: 20.sp,
                                     ),
                                      SizedBox(width: 8.w),
-                                    Text("المستشفى: ${userData['hospitalId'] ?? 'غير متوفر'}", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                                    Expanded( // اجعل المستشفى قابل للتكبير
+                                      child: Text(
+                                        "المستشفى: ${userData['hospitalId'] ?? 'غير متوفر'}",
+                                        style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
+                                        overflow: TextOverflow.ellipsis, // اختصار النص
+                                      ),
+                                    ),
                                   ],
                                 ),
                                  SizedBox(height: 8.h),
@@ -182,7 +196,7 @@ class _ValiditiesState extends State<Validities> {
                                         size: 20.sp,
                                       ),
                                        SizedBox(width: 8.w),
-                                      Text("UID: ${userData['uid'] ?? 'غير متوفر'}", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                                      Expanded(child: Text("UID: ${userData['uid'] ?? 'غير متوفر'}", style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis,)),
                                     ],
                                   ),
                                 if (isAdmin)
@@ -199,7 +213,13 @@ class _ValiditiesState extends State<Validities> {
                                       size: 20.sp,
                                     ),
                                      SizedBox(width: 8.w),
-                                    Text("الرصيد: ${userData['balance'] ?? 'غير متوفر'}", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                    Expanded( // اجعل الرصيد قابلاً للتكبير
+                                      child: Text(
+                                        "الرصيد: ${userData['balance'] ?? 'غير متوفر'}",
+                                        style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+                                        overflow: TextOverflow.ellipsis, // اختصار النص
+                                      ),
+                                    ),
                                   ],
                                 ),
                                  SizedBox(height: 8.h),

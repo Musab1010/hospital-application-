@@ -18,7 +18,7 @@ class BookingScreen extends StatelessWidget {
     return Scaffold(
       drawer: buildDrawerAdmin(context),
       appBar: AppBar(
-        title: FutureBuilder<DocumentSnapshot>(
+        title: FutureBuilder<DocumentSnapshot>( 
           future: firestore.collection('users').doc(user!.uid).get(),
           builder: (context, userSnapshot) {
             if (userSnapshot.connectionState == ConnectionState.waiting) {
@@ -63,9 +63,7 @@ class BookingScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (!userSnapshot.hasData ||
-              userSnapshot.data == null ||
-              !userSnapshot.data!.exists) {
+          if (!userSnapshot.hasData || userSnapshot.data == null || !userSnapshot.data!.exists) {
             return const Center(
               child: Text("لا يمكن العثور على بيانات المستخدم."),
             );
@@ -81,7 +79,6 @@ class BookingScreen extends StatelessWidget {
           }
 
           final hospitalId = userData['hospitalId'].toLowerCase().trim();
-          print('Hospital ID from user (normalized): $hospitalId');
 
           return StreamBuilder<QuerySnapshot>(
             stream: firestore.collection('bookings').snapshots(),
@@ -90,8 +87,7 @@ class BookingScreen extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              if (!bookingSnapshot.hasData ||
-                  bookingSnapshot.data!.docs.isEmpty) {
+              if (!bookingSnapshot.hasData || bookingSnapshot.data!.docs.isEmpty) {
                 return const Center(
                   child: Text("لا توجد حجوزات مرتبطة بهذا المستشفى."),
                 );
@@ -100,8 +96,7 @@ class BookingScreen extends StatelessWidget {
               // تصفية الحجوزات حسب hospitalId
               final filteredBookings = bookingSnapshot.data!.docs.where((doc) {
                 final bookingData = doc.data() as Map<String, dynamic>;
-                final bookingHospitalId =
-                    (bookingData['hospitalId'] ?? '').toLowerCase().trim();
+                final bookingHospitalId = (bookingData['hospitalId'] ?? '').toLowerCase().trim();
                 return bookingHospitalId == hospitalId;
               }).toList();
 
@@ -111,28 +106,36 @@ class BookingScreen extends StatelessWidget {
                 );
               }
 
-              // ترتيب الحجوزات يدويًا حسب timestamp
+              // ترتيب الحجوزات يدويًا حسب timestamp (الأحدث في الأعلى)
               filteredBookings.sort((a, b) {
-                final timestampA =
-                    (a.data() as Map<String, dynamic>)['timestamp'] ??
-                        Timestamp(0, 0);
-                final timestampB =
-                    (b.data() as Map<String, dynamic>)['timestamp'] ??
-                        Timestamp(0, 0);
-                return timestampB.compareTo(timestampA);
+                final timestampA = (a.data() as Map<String, dynamic>)['timestamp'] ?? Timestamp(0, 0);
+                final timestampB = (b.data() as Map<String, dynamic>)['timestamp'] ?? Timestamp(0, 0);
+                return timestampB.compareTo(timestampA); // الأحدث أولاً
               });
 
+              // تقسيم الحجوزات إلى قسمين: المقرؤة وغير المقرؤة
+              final unseenBookings = filteredBookings.where((doc) {
+                final bookingData = doc.data() as Map<String, dynamic>;
+                return !(bookingData['seen'] ?? false);
+              }).toList();
+
+              final seenBookings = filteredBookings.where((doc) {
+                final bookingData = doc.data() as Map<String, dynamic>;
+                return bookingData['seen'] ?? false;
+              }).toList();
+
+              // دمج القائمتين بحيث يتم عرض الحجوزات غير المقرؤة أولاً
+              final allBookings = [...unseenBookings, ...seenBookings];
+
               return ListView.builder(
-                itemCount: filteredBookings.length,
+                itemCount: allBookings.length,
                 itemBuilder: (context, index) {
-                  final bookingData =
-                      filteredBookings[index].data() as Map<String, dynamic>;
-                  final bookingId = filteredBookings[index].id;
+                  final bookingData = allBookings[index].data() as Map<String, dynamic>;
+                  final bookingId = allBookings[index].id;
                   bool isSeen = bookingData['seen'] ?? false;
 
                   return Card(
-                    margin: EdgeInsets.symmetric(
-                        vertical: 8.0.w, horizontal: 2.0.h),
+                    margin: EdgeInsets.symmetric(vertical: 8.0.w, horizontal: 2.0.h),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.w),
                     ),
@@ -146,35 +149,24 @@ class BookingScreen extends StatelessWidget {
                       ),
                       title: Text(
                         "اسم المريض: ${bookingData['name']}",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16.sp,
-                        ),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
                       ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.local_hospital,
-                                  color: Colors.blue),
+                              const Icon(Icons.local_hospital, color: Colors.blue),
                               SizedBox(width: 8.w),
-                              Expanded(
-                                child: Text(
-                                  " ${bookingData['hospital']}",
-                                ),
-                              ),
+                              Expanded(child: Text(" ${bookingData['hospital']}")),
                             ],
                           ),
                           SizedBox(height: 5.h),
                           Row(
                             children: [
-                              const Icon(Icons.category,
-                                  color: Colors.orange),
+                              const Icon(Icons.category, color: Colors.orange),
                               SizedBox(width: 8.w),
-                              Expanded(
-                                  child: Text(
-                                      "القسم: ${bookingData['department']}")),
+                              Expanded(child: Text("القسم: ${bookingData['department']}")),
                             ],
                           ),
                           SizedBox(height: 5.h),
@@ -182,51 +174,38 @@ class BookingScreen extends StatelessWidget {
                             children: [
                               const Icon(Icons.person, color: Colors.green),
                               SizedBox(width: 8.w),
-                              Expanded(
-                                  child: Text(
-                                      "الطبيب: ${bookingData['doctor']}")),
+                              Expanded(child: Text("الطبيب: ${bookingData['doctor']}")),
                             ],
                           ),
                           SizedBox(height: 5.h),
                           Row(
                             children: [
-                              const Icon(Icons.access_time,
-                                  color: Colors.purple),
+                              const Icon(Icons.access_time, color: Colors.purple),
                               SizedBox(width: 8.w),
-                              Expanded(
-                                  child:
-                                      Text("الوقت: ${bookingData['time']}")),
+                              Expanded(child: Text("الوقت: ${bookingData['time']}")),
                             ],
                           ),
                           if (bookingData['timestamp'] != null)
                             Row(
                               children: [
-                                const Icon(Icons.calendar_today,
-                                    color: Colors.red),
+                                const Icon(Icons.calendar_today, color: Colors.red),
                                 const SizedBox(width: 8),
-                                Text(
-                                  "تاريخ الحجز: ${bookingData['timestamp'].toDate()}",
-                                ),
+                                Text("تاريخ الحجز: ${bookingData['timestamp'].toDate()}"),
                               ],
                             ),
                         ],
                       ),
                       trailing: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              isSeen ? Colors.green : Colors.red,
+                          backgroundColor: isSeen ? Colors.green : Colors.red,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.h),
                           ),
-                          padding: EdgeInsets.symmetric(
-                              vertical: 10.w, horizontal: 20.h),
+                          padding: EdgeInsets.symmetric(vertical: 10.w, horizontal: 20.h),
                         ),
                         onPressed: () {
                           // تحديث حالة "تمت الرؤية"
-                          firestore
-                              .collection('bookings')
-                              .doc(bookingId)
-                              .update({'seen': true});
+                          firestore.collection('bookings').doc(bookingId).update({'seen': true});
                         },
                         child: Text(
                           isSeen ? "تمت الرؤية" : "تحديد كمقروء",

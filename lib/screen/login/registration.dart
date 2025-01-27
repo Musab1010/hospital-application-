@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../../model/AuthProvider.dart';
 
 class RegistrationScreen extends StatefulWidget {
+    static const String screenRoute = "OnboardingScreen";
+
   const RegistrationScreen({super.key});
 
   @override
@@ -83,7 +85,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       children: [
                         TextFormField(
                           controller: _nameController,
-                          maxLength: 15,
+                        
                           decoration: InputDecoration(
                             labelText: "الاسم الكامل",
                             border: OutlineInputBorder(

@@ -189,7 +189,7 @@ class _MyHomePageState extends State<MyHomePage> {
         String uid = user.uid;
         DocumentReference userRef = _firestore.collection('users').doc(uid);
         await userRef.update({
-          'balance': FieldValue.increment(-200),
+          'balance': FieldValue.increment(-500),
         });
       }
 
